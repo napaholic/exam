@@ -48,6 +48,7 @@ int main(int ac, char **av)
 	{
 		if (!(id_w > 0 && id_h > 0) || !(id == 'r' || id == 'R'))
 			break;
+		if ()
 	}
 	
 }
