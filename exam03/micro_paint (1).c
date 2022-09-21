@@ -36,6 +36,8 @@ int main(int argc, char **argv)
 	char *paper;
 	int rd, pos;
 	int y, x;
+
+
 	int b_width, b_height;
 	char background;
 	char id, color;

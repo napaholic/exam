@@ -18,7 +18,6 @@ void ft_print_error(char *msg)
 int ft_execve(char **argv, int i, char **envp)
 {
     argv[i] = NULL;
-	ft_print_error(argv[0]);
     execve(argv[0], argv, envp);
     ft_print_error("error : cannot execute ");
     ft_print_error(argv[0]);
