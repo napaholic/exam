@@ -1,3 +1,0 @@
-/goinfre/jaewkim/exam/cmake-build-debug/CMakeFiles/exam.dir
-/goinfre/jaewkim/exam/cmake-build-debug/CMakeFiles/edit_cache.dir
-/goinfre/jaewkim/exam/cmake-build-debug/CMakeFiles/rebuild_cache.dir
