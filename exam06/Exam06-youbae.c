@@ -107,7 +107,7 @@ void remove_client(int del)
 {
     sprintf(wbuf, "server: client %d just left\n", idx_cli[del]);
     broadcast(del, wbuf);
-    free(msgs[del]);
+    free(msgs[del]);₩`
     msgs[del] = 0;
     FD_CLR(del, &fds_asset);
     close(del);

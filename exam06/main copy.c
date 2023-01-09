@@ -4,6 +4,27 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <stdio.h>
+#include <sys/select.h>
+#include <stdlib.h>
+
+int sockfd, connfd;
+unsigned int len;
+struct sockaddr_in servaddr, cli;
+
+#define ARR_MAX 65536
+fd_set fds_write, fds_read, fds_asset;
+int id, max_fd;
+char* msgs[ARR_MAX];
+int idx_cli[ARR_MAX];
+char wbuf[42], rbuf[1025];
+
+void fatal_err()
+{
+	write(2, "Fatal error\n", 12);
+	close(sockfd);
+	exit(1);
+}
 
 int extract_message(char **buf, char **msg)
 {
@@ -53,15 +74,16 @@ char *str_join(char *buf, char *add)
 }
 
 
-int main() {
-	int sockfd, connfd, len;
-	struct sockaddr_in servaddr, cli;
+int main(int ac, char **av) {
+	if (ac != 2) {
+		write(2, "Wrong number of arguments\n", 26);
+		exit(1);
+	}
 	
 	// socket create and verification
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd == -1) {
-		printf("socket creation failed...\n");
-		exit(0);
+	if (sockfd < 0) {
+		fatal_err();
 	}
 	else
 		printf("Socket successfully created..\n");
@@ -70,18 +92,27 @@ int main() {
 	// assign IP, PORT
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(2130706433); //127.0.0.1
-	servaddr.sin_port = htons(8081);
+	servaddr.sin_port = htons(atoi(av[1]));
 	
 	// Binding newly created socket to given IP and verification
 	if ((bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr))) != 0) {
-		printf("socket bind failed...\n");
-		exit(0);
+		fatal_err();
 	}
 	else
 		printf("Socket successfully binded..\n");
-	if (listen(sockfd, 10) != 0) {
-		printf("cannot listen\n");
-		exit(0);
+	if (listen(sockfd, 0) != 0) {
+		fatal_err();
+	}
+	
+	max_fd = sockfd + 1;
+	FD_ZERO(&fds_asset);
+	FD_SET(sockfd, &fds_asset);
+
+	while(1)
+	{
+		fds_read = fds_write = fds_asset;
+		if (select(max_fd, &fds_read, &fds_write, 0, 0) < 0)
+			fatal_err();
 	}
 	len = sizeof(cli);
 	connfd = accept(sockfd, (struct sockaddr *)&cli, &len);
