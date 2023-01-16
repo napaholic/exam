@@ -96,6 +96,7 @@ void accept_client(int fd_new)
 
 void do_accept()
 {
+	write(1, "new connect\n", 12);
     len = sizeof(cli);
     if ((connfd = accept(sockfd, (struct sockaddr *)&cli, &len)) < 0)
         fatal();
@@ -107,7 +108,7 @@ void remove_client(int del)
 {
     sprintf(wbuf, "server: client %d just left\n", idx_cli[del]);
     broadcast(del, wbuf);
-    free(msgs[del]);₩`
+    free(msgs[del]);
     msgs[del] = 0;
     FD_CLR(del, &fds_asset);
     close(del);
@@ -153,8 +154,8 @@ int main(int ac, char **av) {
 	// assign IP, PORT 
 	servaddr.sin_family = AF_INET; 
 	servaddr.sin_addr.s_addr = htonl(2130706433); //127.0.0.1
-	servaddr.sin_port = htons(atoi(av[1])); 
-  
+	servaddr.sin_port = htons(atoi(av[1]));
+ 
 	// Binding newly created socket to given IP and verification 
 	if ((bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr))) != 0)
         fatal();
@@ -167,7 +168,7 @@ int main(int ac, char **av) {
     
 	while(1)
     {
-        fds_read = fds_write = fds_asset;
+		fds_read = fds_write = fds_asset;
         if (select(max_fd, &fds_read, &fds_write, 0, 0) < 0)
             fatal();
         for (int fd = 0; fd < max_fd; fd++)
