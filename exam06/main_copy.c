@@ -12,9 +12,8 @@ int sockfd, connfd;
 unsigned int len;
 struct sockaddr_in servaddr, cli;
 
-fd_set  fds_read, fds_write, fds_asset;
-
 #define ARR_MAX 65536
+fd_set fds_read, fds_write, fds_asset;
 int id, max_fd;
 char *msgs[ARR_MAX];
 int idx_cli[ARR_MAX];
@@ -82,12 +81,12 @@ void broadcast(int fd_from, char *msg)
 	}
 }
 
-void accept_client(int fd_new)
+void accept_cli(int fd_new)
 {
 	if (fd_new >= max_fd)
 		max_fd = fd_new + 1;
-	idx_cli[fd_new] = id++;
 	msgs[fd_new] = 0;
+	idx_cli[fd_new] = id++;
 	FD_SET(fd_new, &fds_asset);
 	sprintf(wbuf, "server: client %d just arrived\n", idx_cli[fd_new]);
 	broadcast(fd_new, wbuf);
@@ -101,10 +100,10 @@ void do_accept()
 		fatal();
 	}
 	else
-		accept_client(connfd);
+		accept_cli(connfd);
 }
 
-void remove_client(int fd_del)
+void remove_cli(int fd_del)
 {
 	sprintf(wbuf, "server: client %d just left\n", idx_cli[fd_del]);
 	broadcast(fd_del, wbuf);
@@ -134,7 +133,7 @@ void do_recv(int fd_target)
 {
 	int cnt_read = recv(fd_target, rbuf, 1024, 0);
 	if (cnt_read <= 0)
-		remove_client(fd_target);
+		remove_cli(fd_target);
 	else
 		send_msg(fd_target, cnt_read);
 }
@@ -145,11 +144,11 @@ int main(int ac, char **av) {
 		write(2, "Wrong number of arguments\n", 26);
 		exit(1);
 	}
+	
 	// socket create and verification
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd == -1) {
+	if (sockfd < 0)
 		fatal();
-	}
 	bzero(&servaddr, sizeof(servaddr));
 	
 	// assign IP, PORT
@@ -158,9 +157,8 @@ int main(int ac, char **av) {
 	servaddr.sin_port = htons(atoi(av[1]));
 	
 	// Binding newly created socket to given IP and verification
-	if ((bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr))) != 0) {
+	if ((bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr))) != 0)
 		fatal();
-	}
 	if (listen(sockfd, 0) != 0) {
 		fatal();
 	}
@@ -183,5 +181,5 @@ int main(int ac, char **av) {
 				do_recv(fd);
 		}
 	}
-
+	return (0);
 }
